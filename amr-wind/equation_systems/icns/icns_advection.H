@@ -342,6 +342,12 @@ struct AdvectionOp<ICNS, fvm::MOL>
         auto& conv_term = fields.conv_term.state(fstate);
         auto& dof_field = fields.field.state(fstate);
 
+        // mac velocity computation requires
+        // dof field needs to be in unmapped mesh space
+        if (dof_field.is_mesh_mapped()) {
+            dof_field.to_unmapped_mesh();
+        }
+
         //
         // Predict velocities
         //
