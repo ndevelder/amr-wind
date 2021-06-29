@@ -350,6 +350,10 @@ void Field::set_default_fillpatch_bc(
 
 void Field::to_mapped_mesh() noexcept
 {
+    if(m_info->m_ncomp < AMREX_SPACEDIM) {
+        amrex::Abort("Trying to transform a non-vector field:" + m_name);
+        return;
+    }
     if(m_mesh_mapped) {
         amrex::Print() << "WARNING: Field already in mapped mesh space: "
                        << m_name << std::endl;
@@ -373,7 +377,7 @@ void Field::to_mapped_mesh() noexcept
             amrex::Array4<amrex::Real> const& field = operator()(lev).array(mfi);
             amrex::Array4<amrex::Real const> const& fac = mesh_fac(lev).const_array(mfi);
 
-            amrex::ParallelFor(mfi.tilebox(),  AMREX_SPACEDIM,
+            amrex::ParallelFor(mfi.tilebox(), AMREX_SPACEDIM,
                 [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) noexcept {
                     amrex::Real det_j = fac(i, j, k, 0) * fac(i, j, k, 1) * fac(i, j, k, 2);
                     field(i, j, k, n) *= det_j / fac(i, j, k, n);
@@ -385,6 +389,10 @@ void Field::to_mapped_mesh() noexcept
 
 void Field::to_unmapped_mesh() noexcept
 {
+    if(m_info->m_ncomp < AMREX_SPACEDIM) {
+        amrex::Abort("Trying to transform a non-vector field:" + m_name);
+        return;
+    }
     if(!m_mesh_mapped) {
         amrex::Print() << "WARNING: Field already in unmapped mesh space: "
                        << m_name << std::endl;
@@ -408,7 +416,7 @@ void Field::to_unmapped_mesh() noexcept
             amrex::Array4<amrex::Real> const& field = operator()(lev).array(mfi);
             amrex::Array4<amrex::Real const> const& fac = mesh_fac(lev).const_array(mfi);
 
-            amrex::ParallelFor(mfi.tilebox(),  AMREX_SPACEDIM,
+            amrex::ParallelFor(mfi.tilebox(), AMREX_SPACEDIM,
                 [=] AMREX_GPU_DEVICE(int i, int j, int k, int n) noexcept {
                     amrex::Real det_j = fac(i, j, k, 0) * fac(i, j, k, 1) * fac(i, j, k, 2);
                     field(i, j, k, n) *= fac(i, j, k, n) / det_j;
