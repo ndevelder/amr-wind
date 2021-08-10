@@ -342,9 +342,9 @@ struct AdvectionOp<ICNS, fvm::MOL>
         auto& dof_field = fields.field.state(fstate);
 
         // computation of velocity on faces requires
-        // dof field to be in unmapped mesh space
-        if (dof_field.is_mesh_mapped()) {
-            dof_field.to_unmapped_mesh();
+        // dof field to be in mapped mesh space
+        if (!dof_field.is_mesh_mapped()) {
+            dof_field.to_mapped_mesh();
         }
 
         //
@@ -381,11 +381,10 @@ struct AdvectionOp<ICNS, fvm::MOL>
         //
 
         // evaluation of advection flux requires
-        // dof field to be in unmapped mesh space
-        if (dof_field.is_mesh_mapped()) {
-            dof_field.to_unmapped_mesh();
+        // dof field to be in mapped mesh space
+        if (!dof_field.is_mesh_mapped()) {
+            dof_field.to_mapped_mesh();
         }
-
 
         int nmaxcomp = AMREX_SPACEDIM;
         for (int lev = 0; lev < repo.num_active_levels(); ++lev) {
