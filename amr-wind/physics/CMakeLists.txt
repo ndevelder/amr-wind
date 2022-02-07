@@ -4,6 +4,8 @@ target_sources(${amr_wind_lib_name}
   BoussinesqBubble.cpp
   BoussinesqBubbleFieldInit.cpp
   ChannelFlow.cpp
+  ChannelFlowLES.cpp
+  ChannelStats.cpp
   RayleighTaylor.cpp
   RayleighTaylorFieldInit.cpp
   TaylorGreenVortex.cpp
