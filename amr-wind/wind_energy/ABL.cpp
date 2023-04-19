@@ -5,6 +5,7 @@
 #include "amr-wind/wind_energy/ABLBoundaryPlane.H"
 #include "amr-wind/equation_systems/icns/source_terms/ABLForcing.H"
 #include "amr-wind/equation_systems/icns/source_terms/ABLMeanBoussinesq.H"
+#include "amr-wind/equation_systems/icns/source_terms/HurricaneForcing.H"
 #include "amr-wind/incflo.H"
 
 #include "AMReX_ParmParse.H"
@@ -20,7 +21,7 @@ ABL::ABL(CFDSim& sim)
     , m_abl_wall_func(sim)
 {
     // Register temperature equation
-    // FIXME: this should be optional?
+    // TODO: this should be optional?
     auto& teqn = sim.pde_manager().register_transport_pde("Temperature");
     m_temperature = &(teqn.fields().field);
 
@@ -34,6 +35,8 @@ ABL::ABL(CFDSim& sim)
         pp.query("statistics_mode", statistics_mode);
         m_stats =
             ABLStatsBase::create(statistics_mode, sim, m_abl_wall_func, dir);
+        // Check for file input
+        m_file_input = pp.contains("initial_condition_input_file");
     }
 
     // Instantiate the ABL field initializer
@@ -44,6 +47,11 @@ ABL::ABL(CFDSim& sim)
 
     // Instantiate the ABL Modulated Power Law
     m_abl_mpl = std::make_unique<ABLModulatedPowerLaw>(sim);
+
+    // Instantiate the file-based field initializer
+    if (m_file_input) {
+        m_field_init_file = std::make_unique<ABLFieldInitFile>();
+    }
 }
 
 ABL::~ABL() = default;
@@ -65,12 +73,25 @@ void ABL::initialize_fields(int level, const amrex::Geometry& geom)
         temp.setVal(0.0);
     }
 
+    bool interp_fine_levels = false;
     for (amrex::MFIter mfi(density); mfi.isValid(); ++mfi) {
         const auto& vbx = mfi.validbox();
 
+        // Initialize with ABL profiles
         (*m_field_init)(
             vbx, geom, velocity.array(mfi), density.array(mfi),
             temp.array(mfi));
+
+        // Overwrite velocities from file
+        if (m_file_input) {
+            interp_fine_levels =
+                (*m_field_init_file)(vbx, geom, velocity.array(mfi), level);
+        }
+    }
+
+    if (interp_fine_levels) {
+        // Fill the finer levels using coarse data
+        m_velocity.fillpatch_from_coarse(level, 0.0, velocity, 0);
     }
 
     if (m_sim.repo().field_exists("tke")) {
@@ -146,6 +167,11 @@ void ABL::pre_advance_work()
 
     if (m_abl_mean_bous != nullptr) {
         m_abl_mean_bous->mean_temperature_update(m_stats->theta_profile());
+    }
+
+    if (m_hurricane_forcing != nullptr) {
+        m_hurricane_forcing->mean_velocity_update(
+            m_stats->vel_profile_coarse());
     }
 
     m_bndry_plane->pre_advance_work();

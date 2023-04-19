@@ -1,5 +1,5 @@
-#ifndef LINEAR_WAVES_OPS_H
-#define LINEAR_WAVES_OPS_H
+#ifndef STOKES_WAVES_OPS_H
+#define STOKES_WAVES_OPS_H
 
 #include "amr-wind/physics/multiphase/MultiPhase.H"
 #include "amr-wind/ocean_waves/relaxation_zones/StokesWaves.H"
@@ -101,8 +101,8 @@ struct UpdateRelaxZonesOp<StokesWaves>
                         amrex::Real eta{0.0}, u_w{0.0}, v_w{0.0}, w_w{0.0};
 
                         relaxation_zones::stokes_waves(
-                            order, wavelength, waterdepth, waveheight, x, time,
-                            eta, u_w, v_w, w_w);
+                            order, wavelength, waterdepth, waveheight, x, z,
+                            time, eta, u_w, v_w, w_w);
 
                         phi(i, j, k) = eta - z;
                         if (phi(i, j, k) + 0.5 * dx[2] >= 0) {

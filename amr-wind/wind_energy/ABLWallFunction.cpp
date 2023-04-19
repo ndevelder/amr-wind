@@ -117,8 +117,8 @@ void ABLWallFunction::update_umean(
         m_mo.vel_mean[0] = m_wf_vel[0];
         m_mo.vel_mean[1] = m_wf_vel[1];
         m_mo.vmag_mean = m_wf_vmag;
-        m_mo.Su_mean = 0.0; // FIXME: need to fill this correctly
-        m_mo.Sv_mean = 0.0; // FIXME: need to fill this correctly
+        m_mo.Su_mean = 0.0; // TODO: need to fill this correctly
+        m_mo.Sv_mean = 0.0; // TODO: need to fill this correctly
         m_mo.theta_mean = m_wf_theta;
     } else {
         m_mo.vel_mean[0] = vpa.line_average_interpolated(m_mo.zref, 0);
@@ -143,6 +143,7 @@ ABLVelWallFunc::ABLVelWallFunc(
     if (m_wall_shear_stress_type == "constant" ||
         m_wall_shear_stress_type == "local" ||
         m_wall_shear_stress_type == "schumann" ||
+        m_wall_shear_stress_type == "donelan" ||
         m_wall_shear_stress_type == "moeng") {
         amrex::Print() << "Shear Stress model: " << m_wall_shear_stress_type
                        << std::endl;
@@ -165,8 +166,8 @@ void ABLVelWallFunc::wall_model(
 
     amrex::Orientation zlo(amrex::Direction::z, amrex::Orientation::low);
     amrex::Orientation zhi(amrex::Direction::z, amrex::Orientation::high);
-    if (!(velocity.bc_type()[zlo] == BC::wall_model ||
-          velocity.bc_type()[zhi] == BC::wall_model)) {
+    if ((velocity.bc_type()[zlo] != BC::wall_model) &&
+        (velocity.bc_type()[zhi] != BC::wall_model)) {
         return;
     }
 
@@ -261,6 +262,11 @@ void ABLVelWallFunc::operator()(Field& velocity, const FieldState rho_state)
 
         auto tau = ShearStressSchumann(mo);
         wall_model(velocity, rho_state, tau);
+
+    } else if (m_wall_shear_stress_type == "donelan") {
+
+        auto tau = ShearStressDonelan(mo);
+        wall_model(velocity, rho_state, tau);
     }
 }
 
@@ -286,8 +292,8 @@ void ABLTempWallFunc::wall_model(
     amrex::Orientation zlo(amrex::Direction::z, amrex::Orientation::low);
     amrex::Orientation zhi(amrex::Direction::z, amrex::Orientation::high);
 
-    if (!(temperature.bc_type()[zlo] == BC::wall_model ||
-          temperature.bc_type()[zhi] == BC::wall_model)) {
+    if ((temperature.bc_type()[zlo] != BC::wall_model) &&
+        (temperature.bc_type()[zhi] != BC::wall_model)) {
         return;
     }
 
@@ -380,6 +386,11 @@ void ABLTempWallFunc::operator()(Field& temperature, const FieldState rho_state)
     } else if (m_wall_shear_stress_type == "schumann") {
 
         auto tau = ShearStressSchumann(mo);
+        wall_model(temperature, rho_state, tau);
+
+    } else if (m_wall_shear_stress_type == "donelan") {
+
+        auto tau = ShearStressDonelan(mo);
         wall_model(temperature, rho_state, tau);
     }
 }

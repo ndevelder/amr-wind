@@ -5,6 +5,7 @@
 
 #include "amr-wind/core/Physics.H"
 #include "amr-wind/wind_energy/ABLFieldInit.H"
+#include "amr-wind/wind_energy/ABLFieldInitFile.H"
 #include "amr-wind/wind_energy/ABLWallFunction.H"
 #include "amr-wind/wind_energy/ABLBoundaryPlane.H"
 #include "amr-wind/core/SimTime.H"
@@ -36,6 +37,7 @@ namespace amr_wind {
 namespace pde::icns {
 class ABLForcing;
 class ABLMeanBoussinesq;
+class HurricaneForcing;
 } // namespace pde::icns
 
 /** Atmospheric Boundary Layer physics
@@ -81,6 +83,11 @@ public:
         m_abl_mean_bous = term;
     }
 
+    void register_hurricane_forcing(pde::icns::HurricaneForcing* forcing) const
+    {
+        m_hurricane_forcing = forcing;
+    }
+
     const ABLBoundaryPlane& bndry_plane() const { return *m_bndry_plane; }
     const ABLModulatedPowerLaw& abl_mpl() const { return *m_abl_mpl; }
 
@@ -116,11 +123,18 @@ private:
 
     mutable pde::icns::ABLMeanBoussinesq* m_abl_mean_bous{nullptr};
 
+    mutable pde::icns::HurricaneForcing* m_hurricane_forcing{nullptr};
+
     //! Default value set based on https://turbmodels.larc.nasa.gov/sst.html
     amrex::Real m_init_sdr{25.0};
 
     //! Hybrid RANS-LES with Nalu-wind
     bool m_hybrid_rl{false};
+
+    //! File input flag
+    bool m_file_input{false};
+    //! File input initializer
+    std::unique_ptr<ABLFieldInitFile> m_field_init_file;
 };
 
 } // namespace amr_wind

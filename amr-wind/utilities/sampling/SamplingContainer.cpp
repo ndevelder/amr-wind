@@ -32,7 +32,7 @@ void sample_field(
     BL_PROFILE("amr-wind::SamplingContainer::sample_impl");
 
     auto* pstruct = pvec.data();
-    auto* parr = &(pavec[0]);
+    auto* parr = pavec.data();
 
     amrex::ParallelFor(np, [=] AMREX_GPU_DEVICE(int ip) noexcept {
         auto& p = pstruct[ip];
@@ -45,9 +45,9 @@ void sample_field(
             (p.pos(2) - problo[2] - offset[2] * dx[2]) * dxi[2];
 
         // Index of the low corner
-        const int i = static_cast<int>(amrex::Math::floor(x));
-        const int j = static_cast<int>(amrex::Math::floor(y));
-        const int k = static_cast<int>(amrex::Math::floor(z));
+        const int i = static_cast<int>(std::floor(x));
+        const int j = static_cast<int>(std::floor(y));
+        const int k = static_cast<int>(std::floor(z));
 
         // Interpolation weights in each direction (linear basis)
         const amrex::Real wx_hi = (x - i);
@@ -120,7 +120,7 @@ void SamplingContainer::initialize_particles(
     ptile.resize(num_particles);
 
     int pidx = 0;
-    const int nextid = ParticleType::NextID();
+    const int nextid = static_cast<int>(ParticleType::NextID());
     auto* pstruct = ptile.GetArrayOfStructs()().data();
     SamplerBase::SampleLocType locs;
     for (const auto& probe : samplers) {
@@ -235,7 +235,7 @@ void SamplingContainer::populate_buffer(std::vector<double>& buf)
             for (ParIterType pti(*this, lev); pti.isValid(); ++pti) {
                 const int np = pti.numParticles();
                 auto* pstruct = pti.GetArrayOfStructs()().data();
-                auto* parr = &pti.GetStructOfArrays().GetRealData(fid)[0];
+                auto* parr = pti.GetStructOfArrays().GetRealData(fid).data();
 
                 amrex::ParallelFor(
                     np, [=] AMREX_GPU_DEVICE(const int ip) noexcept {

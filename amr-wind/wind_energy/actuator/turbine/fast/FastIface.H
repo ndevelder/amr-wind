@@ -51,7 +51,7 @@ protected:
 
     void fast_init_turbine(FastTurbine& /*fi*/);
 
-    void fast_restart_turbine(FastTurbine& /*unused*/);
+    void fast_restart_turbine(FastTurbine& /*fi*/);
 
     void fast_replay_turbine(FastTurbine& /*fi*/);
 

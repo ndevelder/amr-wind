@@ -45,7 +45,6 @@ public:
      *
      *
      */
-    //~ void update_sampling_locations() override;
     void sampling_locations(SampleLocType& /*locs*/) const override;
 
 #ifdef AMR_WIND_USE_OPENFAST

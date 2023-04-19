@@ -58,13 +58,15 @@ void FreeSurface::initialize()
         }
         }
     }
+    // Small number for floating-point comparisons
+    constexpr amrex::Real eps = 1.0e-16;
 
     // Calculate total number of points
     m_npts = m_npts_dir[0] * m_npts_dir[1];
 
     // Turn parameters into 2D grid
     m_locs.resize(m_npts);
-    m_out.resize(m_npts * m_ninst);
+    m_out.resize(static_cast<long>(m_npts) * m_ninst);
 
     // Get size of sample grid spacing
     amrex::Real dxs0 =
@@ -141,19 +143,21 @@ void FreeSurface::initialize()
                         int n1_a = 0;
                         // Get first and after sample indices for gc0
                         if (ntps0 == 1) {
-                            n0_a = ((phi[gc0] == s_gc0) ||
+                            n0_a = ((std::abs(phi[gc0] - s_gc0) < eps) ||
                                     (xm[gc0] - s_gc0 <= 0.5 * dx[gc0] &&
                                      s_gc0 - xm[gc0] < 0.5 * dx[gc0]))
                                        ? 1
                                        : 0;
                         } else {
-                            n0_f = (int)amrex::Math::ceil(
+                            n0_f = (int)std::ceil(
                                 (xm[gc0] - 0.5 * dx[gc0] - s_gc0) / dxs0);
-                            n0_a = (int)amrex::Math::ceil(
+                            n0_a = (int)std::ceil(
                                 (xm[gc0] + 0.5 * dx[gc0] - s_gc0) / dxs0);
                             // Edge case of phi
-                            if (xm[gc0] + 0.5 * dx[gc0] == phi[gc0] &&
-                                s_gc0 + n0_a * dxs0 == phi[gc0]) {
+                            if (std::abs(xm[gc0] + 0.5 * dx[gc0] - phi[gc0]) <
+                                    eps &&
+                                std::abs(s_gc0 + n0_a * dxs0 - phi[gc0]) <
+                                    eps) {
                                 ++n0_a;
                             }
                             // Bounds
@@ -166,19 +170,21 @@ void FreeSurface::initialize()
                         }
                         // Get first and after sample indices for gc1
                         if (ntps1 == 1) {
-                            n1_a = ((phi[gc1] == s_gc1) ||
+                            n1_a = (std::abs(phi[gc1] - s_gc1) < eps ||
                                     (xm[gc1] - s_gc1 <= 0.5 * dx[gc1] &&
                                      s_gc1 - xm[gc1] < 0.5 * dx[gc1]))
                                        ? 1
                                        : 0;
                         } else {
-                            n1_f = (int)amrex::Math::ceil(
+                            n1_f = (int)std::ceil(
                                 (xm[gc1] - 0.5 * dx[gc1] - s_gc1) / dxs1);
-                            n1_a = (int)amrex::Math::ceil(
+                            n1_a = (int)std::ceil(
                                 (xm[gc1] + 0.5 * dx[gc1] - s_gc1) / dxs1);
                             // Edge case of phi
-                            if (xm[gc1] + 0.5 * dx[gc1] == phi[gc1] &&
-                                s_gc1 + n1_a * dxs1 == phi[gc1]) {
+                            if (std::abs(xm[gc1] + 0.5 * dx[gc1] - phi[gc1]) <
+                                    eps &&
+                                std::abs(s_gc1 + n1_a * dxs1 - phi[gc1]) <
+                                    eps) {
                                 ++n1_a;
                             }
                             // Bounds
@@ -248,19 +254,20 @@ void FreeSurface::initialize()
                     int n1_a = 0;
                     // Get first and after sample indices for gc0
                     if (ntps0 == 1) {
-                        n0_a = ((phi[gc0] == s_gc0) ||
+                        n0_a = (std::abs(phi[gc0] - s_gc0) < eps ||
                                 (xm[gc0] - s_gc0 <= 0.5 * dx[gc0] &&
                                  s_gc0 - xm[gc0] < 0.5 * dx[gc0]))
                                    ? 1
                                    : 0;
                     } else {
-                        n0_f = (int)amrex::Math::ceil(
+                        n0_f = (int)std::ceil(
                             (xm[gc0] - 0.5 * dx[gc0] - s_gc0) / dxs0);
-                        n0_a = (int)amrex::Math::ceil(
+                        n0_a = (int)std::ceil(
                             (xm[gc0] + 0.5 * dx[gc0] - s_gc0) / dxs0);
                         // Edge case of phi
-                        if (xm[gc0] + 0.5 * dx[gc0] == phi[gc0] &&
-                            s_gc0 + n0_a * dxs0 == phi[gc0]) {
+                        if (std::abs(xm[gc0] + 0.5 * dx[gc0] - phi[gc0]) <
+                                eps &&
+                            std::abs(s_gc0 + n0_a * dxs0 - phi[gc0]) < eps) {
                             ++n0_a;
                         }
                         // Bounds
@@ -273,19 +280,20 @@ void FreeSurface::initialize()
                     }
                     // Get first and after sample indices for gc1
                     if (ntps1 == 1) {
-                        n1_a = ((phi[gc1] == s_gc1) ||
+                        n1_a = (std::abs(phi[gc1] - s_gc1) < eps ||
                                 (xm[gc1] - s_gc1 <= 0.5 * dx[gc1] &&
                                  s_gc1 - xm[gc1] < 0.5 * dx[gc1]))
                                    ? 1
                                    : 0;
                     } else {
-                        n1_f = (int)amrex::Math::ceil(
+                        n1_f = (int)std::ceil(
                             (xm[gc1] - 0.5 * dx[gc1] - s_gc1) / dxs1);
-                        n1_a = (int)amrex::Math::ceil(
+                        n1_a = (int)std::ceil(
                             (xm[gc1] + 0.5 * dx[gc1] - s_gc1) / dxs1);
                         // Edge case of phi
-                        if (xm[gc1] + 0.5 * dx[gc1] == phi[gc1] &&
-                            s_gc1 + n1_a * dxs1 == phi[gc1]) {
+                        if (std::abs(xm[gc1] + 0.5 * dx[gc1] - phi[gc1]) <
+                                eps &&
+                            std::abs(s_gc1 + n1_a * dxs1 - phi[gc1]) < eps) {
                             ++n1_a;
                         }
                         // Bounds
@@ -396,7 +404,7 @@ void FreeSurface::post_advance_work()
                         for (int n = 0; n < ncomp; ++n) {
                             // Get index of current component and cell
                             const int idx =
-                                (int)amrex::Math::round(idx_arr(i, j, k, n));
+                                (int)std::round(idx_arr(i, j, k, n));
                             // Proceed if there is sample point at this i,j,k,n
                             // and that cell height is below previous instance
                             if (idx >= 0 && dlst_ptr[amrex::max(0, idx)] >
@@ -431,11 +439,11 @@ void FreeSurface::post_advance_work()
                                 bool calc_flag = false;
                                 if ((ni % 2 == 0 &&
                                      vof_arr(i, j, k) >= 1.0 - 1e-12) ||
-                                    (ni % 2 == 1 &&
+                                    (ni % 2 != 0 &&
                                      vof_arr(i, j, k) <= 1e-12)) {
                                     // put bdy at top
                                     alpha = 1.0;
-                                    if (ni % 2 == 1) {
+                                    if (ni % 2 != 0) {
                                         mx *= -1.0;
                                         my *= -1.0;
                                         mz *= -1.0;
@@ -516,14 +524,14 @@ void FreeSurface::post_advance_work()
         // Copy information back from device
         amrex::Gpu::copy(
             amrex::Gpu::deviceToHost, dout.begin(), dout.end(),
-            &m_out[ni * m_npts]);
+            &m_out[static_cast<long>(ni) * m_npts]);
         // Make consistent across parallelization
         for (int n = 0; n < m_npts; n++) {
             amrex::ParallelDescriptor::ReduceRealMax(m_out[ni * m_npts + n]);
         }
         // Copy last m_out to device vector of results of last instance
         amrex::Gpu::copy(
-            amrex::Gpu::hostToDevice, &m_out[ni * m_npts],
+            amrex::Gpu::hostToDevice, &m_out[static_cast<long>(ni) * m_npts],
             &m_out[(ni + 1) * m_npts - 1] + 1, dout_last.begin());
         // Reset current output device vector
         for (int n = 0; n < m_npts; n++) {
@@ -537,6 +545,8 @@ void FreeSurface::post_advance_work()
 void FreeSurface::post_regrid_actions()
 {
     BL_PROFILE("amr-wind::FreeSurface::post_regrid_actions");
+    // Small number for floating-point comparisons
+    constexpr amrex::Real eps = 1.0e-16;
     // Get working fields
     auto& fidx = m_sim.repo().get_field("sample_idx_" + m_label);
     auto& floc = m_sim.repo().get_field("sample_loc_" + m_label);
@@ -594,19 +604,20 @@ void FreeSurface::post_regrid_actions()
                     int n1_a = 0;
                     // Get first and after sample indices for gc0
                     if (ntps0 == 1) {
-                        n0_a = ((phi[gc0] == s_gc0) ||
+                        n0_a = (std::abs(phi[gc0] - s_gc0) < eps ||
                                 (xm[gc0] - s_gc0 <= 0.5 * dx[gc0] &&
                                  s_gc0 - xm[gc0] < 0.5 * dx[gc0]))
                                    ? 1
                                    : 0;
                     } else {
-                        n0_f = (int)amrex::Math::ceil(
+                        n0_f = (int)std::ceil(
                             (xm[gc0] - 0.5 * dx[gc0] - s_gc0) / dxs0);
-                        n0_a = (int)amrex::Math::ceil(
+                        n0_a = (int)std::ceil(
                             (xm[gc0] + 0.5 * dx[gc0] - s_gc0) / dxs0);
                         // Edge case of phi
-                        if (xm[gc0] + 0.5 * dx[gc0] == phi[gc0] &&
-                            s_gc0 + n0_a * dxs0 == phi[gc0]) {
+                        if (std::abs(xm[gc0] + 0.5 * dx[gc0] - phi[gc0]) <
+                                eps &&
+                            std::abs(s_gc0 + n0_a * dxs0 - phi[gc0]) < eps) {
                             ++n0_a;
                         }
                         // Bounds
@@ -619,19 +630,20 @@ void FreeSurface::post_regrid_actions()
                     }
                     // Get first and after sample indices for gc1
                     if (ntps1 == 1) {
-                        n1_a = ((phi[gc1] == s_gc1) ||
+                        n1_a = (std::abs(phi[gc1] - s_gc1) < eps ||
                                 (xm[gc1] - s_gc1 <= 0.5 * dx[gc1] &&
                                  s_gc1 - xm[gc1] < 0.5 * dx[gc1]))
                                    ? 1
                                    : 0;
                     } else {
-                        n1_f = (int)amrex::Math::ceil(
+                        n1_f = (int)std::ceil(
                             (xm[gc1] - 0.5 * dx[gc1] - s_gc1) / dxs1);
-                        n1_a = (int)amrex::Math::ceil(
+                        n1_a = (int)std::ceil(
                             (xm[gc1] + 0.5 * dx[gc1] - s_gc1) / dxs1);
                         // Edge case of phi
-                        if (xm[gc1] + 0.5 * dx[gc1] == phi[gc1] &&
-                            s_gc1 + n1_a * dxs1 == phi[gc1]) {
+                        if (std::abs(xm[gc1] + 0.5 * dx[gc1] - phi[gc1]) <
+                                eps &&
+                            std::abs(s_gc1 + n1_a * dxs1 - phi[gc1]) < eps) {
                             ++n1_a;
                         }
                         // Bounds

@@ -28,7 +28,8 @@ zlo.type                = "sw"
 zhi.type                = "sw"
 
 incflo.physics = RayleighTaylor
-ICNS.source_terms = DensityBuoyancy
+ICNS.source_terms = GravityForcing
+ICNS.use_perturb_pressure = true
 RayleighTaylor.rho_lo = 0.5
 RayleighTaylor.rho_hi = 2.0
 
@@ -42,7 +43,6 @@ tagging.density.grad_error = 0.1 0.1 0.1 0.1
 incflo.use_godunov      = false
 incflo.constant_density = false
 
-incflo.diffusion_type   = 1             # 0 = Explicit, 1 = Crank-Nicolson, 2 = Implicit
 
 incflo.verbose          =   0           # incflo_level
 
