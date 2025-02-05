@@ -1,0 +1,14 @@
+.. meta::108f2ee2a2571b1a9acccad1beda3c6f24bc9df3cbafce91523b9be11338ec3f33fc3926fb634e61c93e0cc0cced0c83682cc6d83f0d1bbc51d407f72f046511
+
+:orphan:
+
+.. title:: AMR-Wind API: /home/runner/work/amr-wind/amr-wind/amr-wind/ocean_waves/boundary_ops/OceanWavesBoundary.H Source File
+
+/home/runner/work/amr-wind/amr-wind/amr-wind/ocean\_waves/boundary\_ops/OceanWavesBoundary.H Source File
+========================================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: _ocean_waves_boundary_8_h_source.html

@@ -1,0 +1,14 @@
+.. meta::6d3d35463a5aa108f551beb660a8b92b0b0358a2c9dfbcf89cd10d3fc46cf70da5c818163c806fcf788dd5f8d09f1c3d0e74b1d41fd2b5389293d8f7d3fc5f14
+
+:orphan:
+
+.. title:: AMR-Wind API: Class Members - Variables
+
+Class Members - Variables
+=========================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: functions_vars_m.html
